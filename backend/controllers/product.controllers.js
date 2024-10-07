@@ -80,4 +80,41 @@ const bidProduct = async (req, res) => {
 }
 
 
-module.exports = { createProduct, getProducts, bidProduct };
+const bidEnd = async(req, res) => {
+     const productId = req.body.productId; // Product Id
+     
+     try {
+          const product = await Product.findById (productId);
+          if (!product) {
+               return res.status(404).json({ message: "Product not found" });
+          }
+
+          if(product.bidStartTime + 24*60*60*1000 >= Date.now()){
+               product.isBid = false;
+               product.isSold = true;
+               
+               await product.save();
+
+               return res.status(400).json(
+                    { message: "Product bidding time expired",
+                         highestBidder: product.highestBidderId,
+                         price: product.currentPrice
+                     }
+
+
+               );
+          }
+          else{
+               return res.status(400).json({ message: "Product bidding time not expired" });
+          }
+
+          
+          }
+     catch (error) {
+          console.error("Error buying product:", error);
+          res.status(500).json({ message: "Server error" });
+     }
+}
+
+
+module.exports = { createProduct, getProducts, bidProduct, bidEnd };
