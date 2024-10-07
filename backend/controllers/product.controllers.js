@@ -28,6 +28,35 @@ const createProduct = async (req, res) => {
      }
 }
 
+const getProductById = async(req, res) => {
+     // console.log
+     const productId = req.params.id;
+     try {
+          const product = await Product .findById(productId);
+          if (!product) {
+               return res.status(404).json({ message: "Product not found" });
+          }
+          res.json(product);
+     }
+     catch (error) {
+          console.error("Error getting product:", error);
+
+          res.status(500).json({ message: "Server error" });
+     }
+}
+
+const getUnsoldProducts = async(req, res) => { 
+     try {
+          const products = await Product.find({ isSold: false });
+          res.json(products);
+     }
+     catch (error) {
+          console.error("Error getting products:", error);
+          res.status(500).json({ message: "Server error" });
+     }
+}
+
+
 const getProducts = async (req, res) => {
      try {
           const products = await Product.find();
@@ -80,4 +109,81 @@ const bidProduct = async (req, res) => {
 }
 
 
-module.exports = { createProduct, getProducts, bidProduct };
+const bidEnd = async(req, res) => {
+     const productId = req.body.productId; // Product Id
+     
+     try {
+          const product = await Product.findById (productId);
+          if (!product) {
+               return res.status(404).json({ message: "Product not found" });
+          }
+
+          if(product.bidStartTime + 24*60*60*1000 >= Date.now()){
+               product.isBid = false;
+               product.isSold = true;
+               
+               await product.save();
+
+               return res.status(400).json(
+                    { message: "Product bidding time expired",
+                         highestBidder: product.highestBidderId,
+                         price: product.currentPrice
+                     }
+
+
+               );
+          }
+          else{
+               return res.status(400).json({ message: "Product bidding time not expired" });
+          }
+
+          
+          }
+     catch (error) {
+          console.error("Error buying product:", error);
+          res.status(500).json({ message: "Server error" });
+     }
+}
+
+const refreshBid = async(req, res) => {
+     
+     
+     try {
+          const product = await Product.find();
+          if (!product) {
+               return res.status(404).json({ message: "Product not found" });
+          }
+
+          solds = []
+
+          product.forEach(element => {
+               if(element.bidStartTime + 24*60*60*1000 >= Date.now()){
+                    element.isBid = false;
+                    element.isSold = true;
+                    solds.push(element);
+                    element.save();
+               }
+          }
+          );
+
+          if(solds.length == 0){
+               return res.status(400).json({ message: "No product bidding time expired" });
+          }
+          else{
+               return res.status(400).json({ message: "Product bidding time expired",
+                    products: solds
+                });
+          }
+
+          
+          }
+     catch (error) {
+
+          console.error("Error refreshing:", error);
+          res.status(500).json({ message: "Server error" });
+     }
+}
+
+
+
+module.exports = { createProduct, getProducts, bidProduct, bidEnd, refreshBid, getProductById, getUnsoldProducts };
