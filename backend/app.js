@@ -7,7 +7,7 @@ const cors = require('cors');
 const mainRouter = require('./routes/mainRouter');
 
 
-dotenv.config();
+dotenv.config({path: '/.env'});
 connectDB()
 .then(() => {
      console.log(`\nMONGO DB connection made. \n`);

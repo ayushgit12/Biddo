@@ -34,7 +34,6 @@ const registerUser = async (req, res) => {
       password: hashedPassword,
       fullName,
       userName
-
     });
     await user.save();
 
@@ -78,10 +77,9 @@ const loginUser = async (req, res) => {
       userName: user.userName,
       fullName: user.fullName,
 
-
     });
-    console.log(`email is : ${email}`);
-  console.log(`password is : ${password}`);
+  // console.log(`email is : ${email}`);
+  // console.log(`password is : ${password}`);
 
     return res.json({
       _id: user._id,

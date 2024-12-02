@@ -17,15 +17,10 @@ const userSchema = new mongoose.Schema({
      type: String,
      required: true,
   },
-  profilePicture: {
-    type: String,
-    default: "",
+  date: {
+    type: Date,
+    default: Date.now,
   },
-
-
-},
-{
-     timestamps: true,
 });
 
 const User = mongoose.model("User", userSchema);
