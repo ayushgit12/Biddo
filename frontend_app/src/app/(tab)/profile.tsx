@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import { useAuth } from '../../context/AuthContext';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { clearUserData, getUserData } from '../utils/auth';
 
 const Profile = () => {
   const { logout } = useAuth();
@@ -13,36 +14,37 @@ const Profile = () => {
     userName: ''
   });
 
+
   useEffect(() => {
-    const loadUserData = async () => {
-      try {
-        const [email, userName] = await Promise.all([
-          AsyncStorage.getItem('userEmail'),
-          AsyncStorage.getItem('userName')
-        ]);
-
-        setUserData({
-          email: email || 'email@example.com',
-          userName: userName || 'User'
-        });
-      } catch (error) {
-        console.error('Error loading user data:', error);
-      }
-    };
-
-    loadUserData();
-  }, []);
-
-  const handleLogout = async () => {
+  const loadUserData = async () => {
     try {
-      // Clear all stored data
-      await AsyncStorage.multiRemove(['userToken', 'userEmail', 'userName', 'userId']);
-      await logout();
-      router.replace('/auth/login');
+      const userData = await getUserData();
+      
+      setUserData({
+        email: userData?.user?.email || 'email@example.com',
+        userName: userData?.user?.userName || 'User'
+      });
     } catch (error) {
-      console.error('Logout error:', error);
+      console.error('Error loading user data:', error);
+      // Fallback to default values in case of error
+      setUserData({
+        email: 'email@example.com',
+        userName: 'User'
+      });
     }
   };
+
+  loadUserData();
+}, []);
+
+  const handleLogout = async () => {
+        const cleared = await clearUserData();
+        if (cleared) {
+            router.replace('/login');
+        } else {
+            Alert.alert('Error', 'Failed to log out');
+        }
+    };
 
   return (
     <View style={styles.container}>

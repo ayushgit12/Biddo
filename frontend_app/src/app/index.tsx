@@ -1,4 +1,4 @@
-import { View, Image } from 'react-native';
+import { View, Image, Text } from 'react-native';
 import React, { useEffect } from 'react';
 import { router } from 'expo-router';
 
@@ -7,7 +7,7 @@ const Splash = () => {
         // Redirect to login after 5 seconds
         const timer = setTimeout(() => {
             router.replace('/auth/login');
-        }, 5000);
+        }, 1000);
 
         return () => clearTimeout(timer);
     }, []);
@@ -19,6 +19,7 @@ const Splash = () => {
                 style={{ width: 200, height: 200 }}
                 resizeMode="contain"
             /> */}
+            <Text>Welcome</Text>
         </View>
     );
 };
